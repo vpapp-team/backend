@@ -1,0 +1,26 @@
+{
+  "name": "backend",
+  "description": "",
+  "version": "1.0.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vpapp-team/backend.git"
+  },
+  "author": "Tobias Kutscha (https://github.com/TimeForANinja)",
+  "main": "index.js",
+  "scripts": {
+    "test": "npm run lint",
+    "lint": "eslint ./",
+    "lint:fix": "eslint --fix ./"
+  },
+  "devDependencies": {
+    "eslint": "^5.0.0"
+  },
+  "engines": {
+    "node": ">=6"
+  },
+  "bugs": {
+    "url": "https://github.com/vpapp-team/backend/issues"
+  },
+  "license": "GPLv3"
+}
