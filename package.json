@@ -13,8 +13,16 @@
     "lint": "eslint ./",
     "lint:fix": "eslint --fix ./"
   },
+  "dependencies": {
+    "backend-api": "github:vpapp-team/backend-api",
+    "backend-data": "github:vpapp-team/backend-data",
+    "backend-proxy": "github:vpapp-team/backend-proxy",
+    "backend-logger": "github:vpapp-team/backend-logger",
+    "backend-util": "github:vpapp-team/backend-util",
+    "minimist": "^1.2.0"
+  },
   "devDependencies": {
-    "eslint": "^5.0.0"
+    "eslint": "^5.13.0"
   },
   "engines": {
     "node": ">=6"
