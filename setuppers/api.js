@@ -1,4 +1,4 @@
-const LOGGER = require('backend-logger');
+const LOGGER = new (require('backend-logger'))();
 
 exports.name = 'api';
 exports.source = 'https://github.com/vpapp-team/backend-api';

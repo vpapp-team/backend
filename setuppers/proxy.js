@@ -3,7 +3,7 @@ const FS = require('fs');
 const PATH = require('path');
 const CRYPTO = require('crypto');
 const READLINE = require('readline');
-const LOGGER = require('backend-logger');
+const LOGGER = new (require('backend-logger'))();
 const UTIL = require('../util.js')
 
 exports.name = 'proxy';

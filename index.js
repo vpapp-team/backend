@@ -2,7 +2,7 @@ const PATH = require('path');
 const UTIL = require('backend-util');
 const UUTIL = require('./util.js')
 const MINIMIST = require('minimist');
-const LOGGER = require('backend-logger');
+const LOGGER = new (require('backend-logger'))();
 
 const argv = MINIMIST(process.argv.splice(2));
 const setuppers = UTIL.loader(PATH.resolve(__dirname, './setuppers/'));
