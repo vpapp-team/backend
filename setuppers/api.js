@@ -1,4 +1,8 @@
 const LOGGER = new (require('backend-logger'))();
+const UUTIL = require('backend-util')
+const FS = require('fs');
+const HTTP = require('http');
+const URL = require('url');
 const UTIL = require('../util.js');
 
 exports.name = 'api';
@@ -48,26 +52,38 @@ exports.install = async () => {
   LOGGER.logClean('snowflake:');
   cfg.snowflake.epoche = Number(await UTIL.readStdin('  snowflake epoche?', UTIL.isUInt, '1515151515151'));
   cfg.snowflake.datacenter = Number(await UTIL.readStdin('  snowflake datacenter id?', line => UTIL.isUInt(line) && Number(line) < 16, Math.floor(Math.random()*15 + 1).toString()));
-
-  cfg.serverConfig.port = 1337;
-  cfg.serverConfig.https = ;
-  cfg.serverConfig.validateCert = ;
-  cfg.BACKUP_DATA_CHECK_INTERVAL = ;
-
-// when using a proxy:
-  // cfg.snowflake.hostname = ;
-  // cfg.serverConfig.isSameServer = ;
-  // cfg.serverConfig.hostname = ;
-  // cfg.serverConfig.method = ;
-  // cfg.serverConfig.path = ;
-  // cfg.serverConfig.receiveEP = ;
-  // cfg.serverConfig.broadcastEP = ;
-  // cfg.proxy = {};
-  // cfg.proxy.secure = ;
-  // cfg.proxy.port = ;
-  // cfg.ONLY_SIGNED_PROXY = ;
-  // cfg.REGISTER_INTERVAL = ;
-// when hosting via https
-  // cfg.SECURE_CONTEXT = ;
-  console.log(cfg);
+  cfg.snowflake.hostname = await UTIL.readStdin('  hostname to use for generated snowflakes?', line => !!line.match(UTIL.hostnameRegex), 'ap1.nigb.app');
+  LOGGER.logClean('accessibility:');
+  cfg.serverConfig.port = Number(await UTIL.readStdin('  port to listen on?', UTIL.isUInt, '1337'));
+  cfg.serverConfig.https = await UTIL.readStdin('  use https when listening? (y|n)', UTIL.isBool, 'n') === 'y';
+  if(cfg.serverConfig.https) {
+    cfg.SECURE_CONTEXT = {};
+    cfg.SECURE_CONTEXT.key = PATH.resolve(await UTIL.readStdin(`  https (priv)key?`, line => FS.existsSync(line), '/etc/letsencrypt/live/<domain>/privkey.pem'));
+    cfg.SECURE_CONTEXT.cert = PATH.resolve(await UTIL.readStdin(`  https cert?`, line => FS.existsSync(line), '/etc/letsencrypt/live/<domain>/cert.pem'));
+    cfg.SECURE_CONTEXT.ca = PATH.resolve(await UTIL.readStdin(`  https ports ca(fullchain)?`, line => FS.existsSync(line), '/etc/letsencrypt/live/<domain>/fullchain.pem'));
+  }
+  LOGGER.logClean('other:');
+  cfg.BACKUP_DATA_CHECK_INTERVAL = Number(await UTIL.readStdin('  interval to check for change in data?', UTIL.isUInt, '3600000'));
+  LOGGER.logClean('proxy:');
+  if(await UTIL.readStdin('  use a proxy with your api server? (y|n)', UTIL.isBool, 'n') !== 'y') {
+    cfg.serverConfig.hostname = await UTIL.readStdin('  api\'s own hostname?', line => !!line.match(UTIL.hostnameRegex), 'api1.nigb.app');
+    cfg.serverConfig.method = await UTIL.readStdin('  method to use with validation request?', line => HTTP.METHODS.includes(line), '');
+    cfg.serverConfig.path = URL.parse(await UTIL.readStdin('  path to use with validation request?', line => !!URL.parse(line).path, '')).path;
+    cfg.serverConfig.receiveEP = (await UTIL.readStdin('  hostnames of endpoints to receive requests from?', line => !line.split(',').some(a => !a.match(UTIL.hostnameRegex)), 'api')).split(',');
+    cfg.serverConfig.broadcastEP = (await UTIL.readStdin('  hostnames of endpoints to receive broadcasts from?', line => !line.split(',').some(a => !a.match(UTIL.hostnameRegex)), 'api')).split(',');
+    ***cfg.serverConfig.signature = UUTIL.sign(JSON.stringify(cfg.serverConfig), FS.readFileSync(await UTIL.readStdin(`  privatekey to sign the serverConfig with?`, line => FS.existsSync(line), process.cwd())));
+    cfg.proxy = {};
+    while(!cfg.proxy.port) {
+      cfg.proxy = UTIL.parseClientLocation(await UTIL.readStdin(`  location of the proxy? format: <method>@<hostname><:port><url default '/'>?`, UTIL.isClientLocation, 'SUBSCRIBE@proxy.nigb.app/login'));
+    }
+    cfg.proxy.secure = await UTIL.readStdin('  use https to connect to the proxy? (y|n)', UTIL.isBool, 'y') !== 'y';
+    if(cfg.proxy.secure) {
+      cfg.ONLY_SIGNED_PROXY = await UTIL.readStdin('  does the proxy have to have a valid ssl cert? (y|n)', UTIL.isBool, 'y') !== 'y';
+    }
+    cfg.REGISTER_INTERVAL = Number(await UTIL.readStdin('  interval to register on proxy?', UTIL.isUInt, '300000'));
+  }
+  const n = PATH.resolve(__dirname, `../api-${new Date().getDay()}-${new Date().getMonth()}-${new Date().getFullYear()}-${Date.now()}.json`);
+  const l = 100 - (16 + n.length);
+  FS.writeFileSync(n, JSON.stringify(cfg, null, 2));
+  LOGGER.logClean(` \n ${'*'.repeat(100)}\n *${' '.repeat(98)}*\n * SAVED CFG AS ${n}${' '.repeat(l < 0 ? 0 : l)}*\n *${' '.repeat(98)}*\n ${'*'.repeat(100)}\n`);
 };
