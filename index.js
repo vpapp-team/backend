@@ -16,10 +16,13 @@ const setuppers = UTIL.loader(PATH.resolve(__dirname, './setuppers/'));
       const s = setuppers.array();
       const padLength = s.concat().sort((a, b) => b.name.length - a.name.length)[0].name.length;
       LOGGER.logClean('available modules:');
-      LOGGER.logClean(s.map((a, i) => `${i}: ${a.name.padEnd(padLength)} | ${a.description}`).join('\n'));
-      const selected = await UUTIL.readStdin('module:', line => !!s[Number(line)]);
-      s[selected].install();
+      LOGGER.logClean(s.map((a, i) => `${i + 1}: ${a.name.padEnd(padLength)} | ${a.description}`).join('\n'));
+      const selected = Number(await UUTIL.readStdin('module:', line => !!s[Number(line) - 1]));
+      s[selected - 1].install();
     }
+  } else if (argv._[0] === 'start') {
+    // TODO: add this
+    throw new Error('not yet implementet');
   } else {
     LOGGER.errorClean(`Usage:
   backend <option>
