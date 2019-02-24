@@ -48,8 +48,8 @@ exports.install = async() => {
   }
   cfg.mysql_read.hostname = await UTIL.readStdin('  mysql servers hostname?', line => !!line.match(UTIL.hostnameRegex), 'mysql.nigb.app');
   cfg.mysql_read.port = Number(await UTIL.readStdin('  mysql servers port?', UTIL.isUInt, '3306'));
-  cfg.mysql_read.user = await UTIL.readStdin('  mysql servers username?', line => line.length > 0);
-  cfg.mysql_read.password = await UTIL.readStdin('  mysql servers password?', line => line.length > 0);
+  cfg.mysql_read.user = await UTIL.readStdin('  mysql servers (read) username?', line => line.length > 0);
+  cfg.mysql_read.password = await UTIL.readStdin('  mysql servers (read) password?', line => line.length > 0);
   cfg.mysql_read.database = await UTIL.readStdin('  mysql database name?', line => !!line.match(UTIL.mysqlRegex), 'NIGB');
   LOGGER.logClean('snowflake:');
   cfg.snowflake.epoche = Number(await UTIL.readStdin('  snowflake epoche?', UTIL.isUInt, '1515151515151'));

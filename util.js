@@ -4,9 +4,19 @@ const FS = require('fs');
 
 exports.mysqlRegex = /^[$a-zA-Z0-9_]+$/;
 const hostnameRegex = exports.hostnameRegex = /^@$|^[0-9a-zA-Z]+([-0-9a-zA-Z.][0-9a-zA-Z]+)*$|^([0-9]{1,3}\.){2}[0-9]{1,3}$/; // eslint-disable-line max-len
+exports.urlRegex = /https?:\/\/[-a-zA-Z0-9@:%._+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_+.~#?&//=]*)/;
 const isBool = exports.isBool = line => ['y', 'n'].includes(line);
 
 exports.existsFile = line => FS.existsSync(line) && FS.statSync(line).isFile();
+
+exports.parseUUIDFormater = line => {
+  let parts = line.split('/');
+  return {
+    regex: parts[1],
+    flags: parts[2],
+    replacement: parts[3],
+  };
+};
 
 exports.parseEndpoint = line => {
   const parts = line.split(',');

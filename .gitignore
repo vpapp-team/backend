@@ -3,3 +3,4 @@ package-lock.json
 *.pem
 api*.json
 proxy*.json
+data*.json
