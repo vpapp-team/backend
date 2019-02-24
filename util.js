@@ -1,9 +1,14 @@
 const READLINE = require('readline');
 const URL = require('url');
+const FS = require('fs');
 
 exports.mysqlRegex = /^[$a-zA-Z0-9_]+$/
-const hostnameRegex = exports.hostnameRegex = /^@$|^[a-zA-Z]+([-a-zA-Z.][a-zA-Z]+)*$|^([0-9]{1,3}\.){2}[0-9]{1,3}$///
+const hostnameRegex = exports.hostnameRegex = /^@$|^[0-9a-zA-Z]+([-0-9a-zA-Z.][0-9a-zA-Z]+)*$|^([0-9]{1,3}\.){2}[0-9]{1,3}$///
 const isBool = exports.isBool = line => ['y', 'n'].includes(line);
+
+exports.existsFile = line => {
+    return FS.existsSync(line) && FS.statSync(line).isFile();
+  }
 
 exports.parseEndpoint = line => {
     const parts = line.split(',');

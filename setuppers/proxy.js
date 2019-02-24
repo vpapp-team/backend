@@ -26,14 +26,14 @@ exports.install = async() => {
     if (cfg.general.redirectHttp) LOGGER.logClean(' !enforcing https since you set redirectHttp to true');
     cfg.general.httpsPorts = (await UTIL.readStdin(`  https ports to listen on?`, UTIL.isUIntList, '443,8443')).split(',').map(a => Number(a));
     cfg.general.SECURE_CONTEXT = {};
-    cfg.general.SECURE_CONTEXT.key = PATH.resolve(await UTIL.readStdin(`  https (priv)key?`, line => FS.existsSync(line), '/etc/letsencrypt/live/<domain>/privkey.pem'));
-    cfg.general.SECURE_CONTEXT.cert = PATH.resolve(await UTIL.readStdin(`  https cert?`, line => FS.existsSync(line), '/etc/letsencrypt/live/<domain>/cert.pem'));
-    cfg.general.SECURE_CONTEXT.ca = PATH.resolve(await UTIL.readStdin(`  https ports ca(fullchain)?`, line => FS.existsSync(line), '/etc/letsencrypt/live/<domain>/fullchain.pem'));
+    cfg.general.SECURE_CONTEXT.key = PATH.resolve(await UTIL.readStdin(`  https (priv)key?`, line => UTIL.existsFile(line), '/etc/letsencrypt/live/<domain>/privkey.pem'));
+    cfg.general.SECURE_CONTEXT.cert = PATH.resolve(await UTIL.readStdin(`  https cert?`, line => UTIL.existsFile(line), '/etc/letsencrypt/live/<domain>/cert.pem'));
+    cfg.general.SECURE_CONTEXT.ca = PATH.resolve(await UTIL.readStdin(`  https ports ca(fullchain)?`, line => UTIL.existsFile(line), '/etc/letsencrypt/live/<domain>/fullchain.pem'));
   }
   LOGGER.logClean('communication:');
   cfg.general.maxServerAge = Number(await UTIL.readStdin('  milliseconds after which a server gets invalidated if it doesnt reauth?', UTIL.isUInt, '300000'));
   if (await UTIL.readStdin('  Already have a key pair to validate register requests? (y|n)', UTIL.isBool, 'n') === 'y') {
-    cfg.general.publicKey = FS.readFileSync(await UTIL.readStdin(`  location of your public key?`, line => FS.existsSync(line), '/path/to/publickey/pubkey.pem'));
+    cfg.general.publicKey = FS.readFileSync(await UTIL.readStdin(`  location of your public key?`, line => UTIL.existsFile(line), '/path/to/publickey/pubkey.pem'));
   } else {
     const { publicKey, privateKey } = CRYPTO.generateKeyPairSync('rsa', {
       modulusLength: 4096,

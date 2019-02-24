@@ -3,6 +3,7 @@ const UUTIL = require('backend-util')
 const FS = require('fs');
 const HTTP = require('http');
 const URL = require('url');
+const PATH = require('path');
 const UTIL = require('../util.js');
 
 exports.name = 'api';
@@ -58,23 +59,23 @@ exports.install = async () => {
   cfg.serverConfig.https = await UTIL.readStdin('  use https when listening? (y|n)', UTIL.isBool, 'n') === 'y';
   if(cfg.serverConfig.https) {
     cfg.SECURE_CONTEXT = {};
-    cfg.SECURE_CONTEXT.key = PATH.resolve(await UTIL.readStdin(`  https (priv)key?`, line => FS.existsSync(line), '/etc/letsencrypt/live/<domain>/privkey.pem'));
-    cfg.SECURE_CONTEXT.cert = PATH.resolve(await UTIL.readStdin(`  https cert?`, line => FS.existsSync(line), '/etc/letsencrypt/live/<domain>/cert.pem'));
-    cfg.SECURE_CONTEXT.ca = PATH.resolve(await UTIL.readStdin(`  https ports ca(fullchain)?`, line => FS.existsSync(line), '/etc/letsencrypt/live/<domain>/fullchain.pem'));
+    cfg.SECURE_CONTEXT.key = PATH.resolve(await UTIL.readStdin(`  https (priv)key?`, line => UTIL.existsFile(line), '/etc/letsencrypt/live/<domain>/privkey.pem'));
+    cfg.SECURE_CONTEXT.cert = PATH.resolve(await UTIL.readStdin(`  https cert?`, line => UTIL.existsFile(line), '/etc/letsencrypt/live/<domain>/cert.pem'));
+    cfg.SECURE_CONTEXT.ca = PATH.resolve(await UTIL.readStdin(`  https ports ca(fullchain)?`, line => UTIL.existsFile(line), '/etc/letsencrypt/live/<domain>/fullchain.pem'));
   }
   LOGGER.logClean('other:');
   cfg.BACKUP_DATA_CHECK_INTERVAL = Number(await UTIL.readStdin('  interval to check for change in data?', UTIL.isUInt, '3600000'));
   LOGGER.logClean('proxy:');
-  if(await UTIL.readStdin('  use a proxy with your api server? (y|n)', UTIL.isBool, 'n') !== 'y') {
+  if(await UTIL.readStdin('  use a proxy with your api server? (y|n)', UTIL.isBool, 'n') === 'y') {
     cfg.serverConfig.hostname = await UTIL.readStdin('  api\'s own hostname?', line => !!line.match(UTIL.hostnameRegex), 'api1.nigb.app');
     cfg.serverConfig.method = await UTIL.readStdin('  method to use with validation request?', line => HTTP.METHODS.includes(line), '');
     cfg.serverConfig.path = URL.parse(await UTIL.readStdin('  path to use with validation request?', line => !!URL.parse(line).path, '')).path;
     cfg.serverConfig.receiveEP = (await UTIL.readStdin('  hostnames of endpoints to receive requests from?', line => !line.split(',').some(a => !a.match(UTIL.hostnameRegex)), 'api')).split(',');
     cfg.serverConfig.broadcastEP = (await UTIL.readStdin('  hostnames of endpoints to receive broadcasts from?', line => !line.split(',').some(a => !a.match(UTIL.hostnameRegex)), 'api')).split(',');
-    ***cfg.serverConfig.signature = UUTIL.sign(JSON.stringify(cfg.serverConfig), FS.readFileSync(await UTIL.readStdin(`  privatekey to sign the serverConfig with?`, line => FS.existsSync(line), process.cwd())));
+    cfg.serverConfig.signature = UUTIL.sign(JSON.stringify(cfg.serverConfig), FS.readFileSync(await UTIL.readStdin(`  privatekey to sign the serverConfig with?`, line => UTIL.existsFile(line), process.cwd())));
     cfg.proxy = {};
     while(!cfg.proxy.port) {
-      cfg.proxy = UTIL.parseClientLocation(await UTIL.readStdin(`  location of the proxy? format: <method>@<hostname><:port><url default '/'>?`, UTIL.isClientLocation, 'SUBSCRIBE@proxy.nigb.app/login'));
+      cfg.proxy = UTIL.parseClientLocation(await UTIL.readStdin(`  location of the proxy? format: <method>@<hostname><:port><url default '/'>?`, UTIL.isClientLocation, 'SUBSCRIBE@proxy.nigb.app:443/login'));
     }
     cfg.proxy.secure = await UTIL.readStdin('  use https to connect to the proxy? (y|n)', UTIL.isBool, 'y') !== 'y';
     if(cfg.proxy.secure) {
