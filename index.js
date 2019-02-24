@@ -1,6 +1,6 @@
 const PATH = require('path');
 const UTIL = require('backend-util');
-const UUTIL = require('./util.js')
+const UUTIL = require('./util.js');
 const MINIMIST = require('minimist');
 const LOGGER = new (require('backend-logger'))();
 

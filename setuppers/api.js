@@ -1,5 +1,6 @@
+/* eslint-disable max-len, no-await-in-loop */
 const LOGGER = new (require('backend-logger'))();
-const UUTIL = require('backend-util')
+const UUTIL = require('backend-util');
 const FS = require('fs');
 const HTTP = require('http');
 const URL = require('url');
@@ -9,14 +10,14 @@ const UTIL = require('../util.js');
 exports.name = 'api';
 exports.source = 'https://github.com/vpapp-team/backend-api';
 exports.description = 'The API Endpoints to use for the app';
-exports.install = async () => {
+exports.install = async() => {
   LOGGER.logClean('installing api');
   const cfg = { mysql_read: {}, snowflake: {}, serverConfig: {} };
   LOGGER.logClean('mysql:');
   cfg.mysql_read.connectionLimit = Number(await UTIL.readStdin('  mysql connection limit?', UTIL.isUInt, '10'));
   cfg.mysql_read.charset = await UTIL.readStdin('  mysql character set?', line => !!line.match(/^[-a-zA-Z0-9_]+$/), 'UTF8MB4_GENERAL_CI');
-  if(await UTIL.readStdin('  use default sql table names? (y|n)', UTIL.isBool, 'y') !== 'y') {
-    cfg.mysql_read.tables = {}
+  if (await UTIL.readStdin('  use default sql table names? (y|n)', UTIL.isBool, 'y') !== 'y') {
+    cfg.mysql_read.tables = {};
     cfg.mysql_read.tables.CALENDAR = await UTIL.readStdin('  name for Calendar table?', line => !!line.match(UTIL.mysqlRegex), 'CalendarEvents');
     cfg.mysql_read.tables.ERRORS = await UTIL.readStdin('  name for Error table?', line => !!line.match(UTIL.mysqlRegex), 'Errors');
     cfg.mysql_read.tables.FEEDBACK = await UTIL.readStdin('  name for Feedback table?', line => !!line.match(UTIL.mysqlRegex), 'Feedback');
@@ -43,7 +44,7 @@ exports.install = async () => {
       ENDPOINTS: 'Endpoints',
       BACKENDS: 'Backends',
       WEBADMINS: 'WebAdmins',
-    }
+    };
   }
   cfg.mysql_read.hostname = await UTIL.readStdin('  mysql servers hostname?', line => !!line.match(UTIL.hostnameRegex), 'mysql.nigb.app');
   cfg.mysql_read.port = Number(await UTIL.readStdin('  mysql servers port?', UTIL.isUInt, '3306'));
@@ -52,12 +53,12 @@ exports.install = async () => {
   cfg.mysql_read.database = await UTIL.readStdin('  mysql database name?', line => !!line.match(UTIL.mysqlRegex), 'NIGB');
   LOGGER.logClean('snowflake:');
   cfg.snowflake.epoche = Number(await UTIL.readStdin('  snowflake epoche?', UTIL.isUInt, '1515151515151'));
-  cfg.snowflake.datacenter = Number(await UTIL.readStdin('  snowflake datacenter id?', line => UTIL.isUInt(line) && Number(line) < 16, Math.floor(Math.random()*15 + 1).toString()));
+  cfg.snowflake.datacenter = Number(await UTIL.readStdin('  snowflake datacenter id?', line => UTIL.isUInt(line) && Number(line) < 16, Math.floor((Math.random() * 15) + 1).toString()));
   cfg.snowflake.hostname = await UTIL.readStdin('  hostname to use for generated snowflakes?', line => !!line.match(UTIL.hostnameRegex), 'ap1.nigb.app');
   LOGGER.logClean('accessibility:');
   cfg.serverConfig.port = Number(await UTIL.readStdin('  port to listen on?', UTIL.isUInt, '1337'));
   cfg.serverConfig.https = await UTIL.readStdin('  use https when listening? (y|n)', UTIL.isBool, 'n') === 'y';
-  if(cfg.serverConfig.https) {
+  if (cfg.serverConfig.https) {
     cfg.SECURE_CONTEXT = {};
     cfg.SECURE_CONTEXT.key = PATH.resolve(await UTIL.readStdin(`  https (priv)key?`, line => UTIL.existsFile(line), '/etc/letsencrypt/live/<domain>/privkey.pem'));
     cfg.SECURE_CONTEXT.cert = PATH.resolve(await UTIL.readStdin(`  https cert?`, line => UTIL.existsFile(line), '/etc/letsencrypt/live/<domain>/cert.pem'));
@@ -66,7 +67,7 @@ exports.install = async () => {
   LOGGER.logClean('other:');
   cfg.BACKUP_DATA_CHECK_INTERVAL = Number(await UTIL.readStdin('  interval to check for change in data?', UTIL.isUInt, '3600000'));
   LOGGER.logClean('proxy:');
-  if(await UTIL.readStdin('  use a proxy with your api server? (y|n)', UTIL.isBool, 'n') === 'y') {
+  if (await UTIL.readStdin('  use a proxy with your api server? (y|n)', UTIL.isBool, 'n') === 'y') {
     cfg.serverConfig.hostname = await UTIL.readStdin('  api\'s own hostname?', line => !!line.match(UTIL.hostnameRegex), 'api1.nigb.app');
     cfg.serverConfig.method = await UTIL.readStdin('  method to use with validation request?', line => HTTP.METHODS.includes(line), '');
     cfg.serverConfig.path = URL.parse(await UTIL.readStdin('  path to use with validation request?', line => !!URL.parse(line).path, '')).path;
@@ -74,11 +75,13 @@ exports.install = async () => {
     cfg.serverConfig.broadcastEP = (await UTIL.readStdin('  hostnames of endpoints to receive broadcasts from?', line => !line.split(',').some(a => !a.match(UTIL.hostnameRegex)), 'api')).split(',');
     cfg.serverConfig.signature = UUTIL.sign(JSON.stringify(cfg.serverConfig), FS.readFileSync(await UTIL.readStdin(`  privatekey to sign the serverConfig with?`, line => UTIL.existsFile(line), process.cwd())));
     cfg.proxy = {};
-    while(!cfg.proxy.port) {
-      cfg.proxy = UTIL.parseClientLocation(await UTIL.readStdin(`  location of the proxy? format: <method>@<hostname><:port><url default '/'>?`, UTIL.isClientLocation, 'SUBSCRIBE@proxy.nigb.app:443/login'));
+    while (!cfg.proxy.port) {
+      cfg.proxy = UTIL.parseClientLocation(
+        await UTIL.readStdin(`  location of the proxy? format: <method>@<hostname><:port><url default '/'>?`, UTIL.isClientLocation, 'SUBSCRIBE@proxy.nigb.app:443/login')
+      );
     }
     cfg.proxy.secure = await UTIL.readStdin('  use https to connect to the proxy? (y|n)', UTIL.isBool, 'y') !== 'y';
-    if(cfg.proxy.secure) {
+    if (cfg.proxy.secure) {
       cfg.ONLY_SIGNED_PROXY = await UTIL.readStdin('  does the proxy have to have a valid ssl cert? (y|n)', UTIL.isBool, 'y') !== 'y';
     }
     cfg.REGISTER_INTERVAL = Number(await UTIL.readStdin('  interval to register on proxy?', UTIL.isUInt, '300000'));

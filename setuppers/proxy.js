@@ -2,9 +2,8 @@
 const FS = require('fs');
 const PATH = require('path');
 const CRYPTO = require('crypto');
-const READLINE = require('readline');
 const LOGGER = new (require('backend-logger'))();
-const UTIL = require('../util.js')
+const UTIL = require('../util.js');
 
 exports.name = 'proxy';
 exports.source = 'https://github.com/vpapp-team/backend-proxy';
