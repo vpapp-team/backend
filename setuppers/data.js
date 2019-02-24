@@ -92,7 +92,7 @@ exports.install = async() => {
   cfg.MAX_TIME_FOR_3_CRASHES = await UTIL.readStdin('  how long are 3 crashes allowed to be apart (time in min) before a module gets disabled?', UTIL.isUInt, '5');
   cfg.BROADCAST_DELAY_MIN = await UTIL.readStdin('  time (in minutes) to delay broadcasts to wait for other modules to finish?', UTIL.isUInt, '5');
   LOGGER.logClean('finished:');
-  const n = PATH.resolve(__dirname, `../data-${new Date().getDay()}-${new Date().getMonth()}-${new Date().getFullYear()}-${Date.now()}.json`);
+  const n = PATH.resolve(__dirname, `../out/data-${new Date().getDay()}-${new Date().getMonth()}-${new Date().getFullYear()}-${Date.now()}.json`);
   const l = 100 - (16 + n.length);
   FS.writeFileSync(n, JSON.stringify(cfg, null, 2));
   LOGGER.logClean(` \n ${'*'.repeat(100)}\n *${' '.repeat(98)}*\n * SAVED CFG AS ${n}${' '.repeat(l < 0 ? 0 : l)}*\n *${' '.repeat(98)}*\n ${'*'.repeat(100)}\n`);

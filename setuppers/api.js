@@ -86,7 +86,8 @@ exports.install = async() => {
     }
     cfg.REGISTER_INTERVAL = Number(await UTIL.readStdin('  interval to register on proxy?', UTIL.isUInt, '300000'));
   }
-  const n = PATH.resolve(__dirname, `../api-${new Date().getDay()}-${new Date().getMonth()}-${new Date().getFullYear()}-${Date.now()}.json`);
+  LOGGER.logClean('finished:');
+  const n = PATH.resolve(__dirname, `../out/api-${new Date().getDay()}-${new Date().getMonth()}-${new Date().getFullYear()}-${Date.now()}.json`);
   const l = 100 - (16 + n.length);
   FS.writeFileSync(n, JSON.stringify(cfg, null, 2));
   LOGGER.logClean(` \n ${'*'.repeat(100)}\n *${' '.repeat(98)}*\n * SAVED CFG AS ${n}${' '.repeat(l < 0 ? 0 : l)}*\n *${' '.repeat(98)}*\n ${'*'.repeat(100)}\n`);

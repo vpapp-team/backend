@@ -40,7 +40,7 @@ exports.install = async() => {
       privateKeyEncoding: { type: 'pkcs8', format: 'pem' },
     });
     cfg.general.publicKey = publicKey;
-    const n = PATH.resolve(__dirname, '../privkey.pem');
+    const n = PATH.resolve(__dirname, '../out/privkey.pem');
     FS.writeFileSync(n, privateKey);
     const l = 100 - (24 + n.length);
     LOGGER.logClean(` \n ${'*'.repeat(100)}\n *${' '.repeat(98)}*\n * PRIVATE KEY SAVED IN ${n}${' '.repeat(l < 0 ? 0 : l)}*\n *${' '.repeat(98)}*\n ${'*'.repeat(100)}\n`);
@@ -50,7 +50,8 @@ exports.install = async() => {
   while (!cfg.endpoints.length || await UTIL.readStdin('  Want to add another endpoint? (y|n)', UTIL.isBool, 'n') === 'y') {
     cfg.endpoints.push(UTIL.parseEndpoint(await UTIL.readStdin('  Enter an endpoint: <hostname @=default>,<allowUnsecure (y|n)>', UTIL.isEndpoint, '@,n')));
   }
-  const n = PATH.resolve(__dirname, `../proxy-${new Date().getDay()}-${new Date().getMonth()}-${new Date().getFullYear()}-${Date.now()}.json`);
+  LOGGER.logClean('finished:');
+  const n = PATH.resolve(__dirname, `../out/proxy-${new Date().getDay()}-${new Date().getMonth()}-${new Date().getFullYear()}-${Date.now()}.json`);
   const l = 100 - (16 + n.length);
   FS.writeFileSync(n, JSON.stringify(cfg, null, 2));
   LOGGER.logClean(` \n ${'*'.repeat(100)}\n *${' '.repeat(98)}*\n * SAVED CFG AS ${n}${' '.repeat(l < 0 ? 0 : l)}*\n *${' '.repeat(98)}*\n ${'*'.repeat(100)}\n`);
