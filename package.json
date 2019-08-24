@@ -22,7 +22,7 @@
     "minimist": "^1.2.0"
   },
   "devDependencies": {
-    "eslint": "^6.0.0"
+    "eslint": "^6.2.2"
   },
   "engines": {
     "node": ">=8"
